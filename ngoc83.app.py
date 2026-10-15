@@ -57,7 +57,7 @@ h1 {
 
 .stats {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 6px;
 }
 
@@ -113,11 +113,6 @@ button:active {
     color: white;
 }
 
-.danger {
-    background: #ef4444;
-    color: white;
-}
-
 .music-button {
     width: 100%;
     margin-top: 10px;
@@ -165,6 +160,7 @@ button:active {
     border-radius: 50%;
     background: #1c1917;
     z-index: 0;
+    pointer-events: none;
 }
 
 .character {
@@ -172,6 +168,7 @@ button:active {
     z-index: 1;
     animation: pop .13s ease-out;
     line-height: 1;
+    pointer-events: none;
 }
 
 @keyframes pop {
@@ -258,10 +255,12 @@ select {
                 <div class="stat-label">⭐ ĐIỂM</div>
                 <div class="stat-value" id="score">0</div>
             </div>
+
             <div class="stat">
                 <div class="stat-label">❤️ MẠNG</div>
                 <div class="stat-value" id="lives">❤️❤️❤️</div>
             </div>
+
             <div class="stat">
                 <div class="stat-label">⏱️ THỜI GIAN</div>
                 <div class="stat-value" id="time">30</div>
@@ -271,12 +270,15 @@ select {
 
     <div id="menu" class="panel">
         <h2>🎯 Sẵn sàng chưa?</h2>
+
         <p>🐭 Chuột thường: +1 điểm</p>
         <p>🐹 Hamster: +3 điểm</p>
-        <p>💣 Đập trúng bom: THUA NGAY!</p>
-        <p>❤️ Em có 3 mạng và 30 giây để ghi điểm.</p>
+        <p>💣 Đập bom: mất 1 tim</p>
+        <p>❤️ Hết 3 tim là thua!</p>
+        <p>⏱️ Thời gian chơi: 30 giây</p>
 
         <label for="difficulty">Chọn độ khó:</label>
+
         <select id="difficulty">
             <option value="3000">Dễ — 3 giây</option>
             <option value="2500" selected>Vừa — 2,5 giây</option>
@@ -314,8 +316,13 @@ select {
             <div id="message">Bắt đầu đập chuột thôi!</div>
 
             <div class="controls">
-                <button class="secondary" id="pauseBtn">⏸️ Tạm dừng</button>
-                <button class="secondary" id="homeBtn">🏠 Trang chủ</button>
+                <button class="secondary" id="pauseBtn">
+                    ⏸️ Tạm dừng
+                </button>
+
+                <button class="secondary" id="homeBtn">
+                    🏠 Trang chủ
+                </button>
             </div>
         </div>
     </div>
@@ -324,9 +331,11 @@ select {
         <h2 id="resultTitle">🎉 KẾT THÚC!</h2>
         <p id="resultScore"></p>
         <p id="bestScore"></p>
+
         <button class="primary" id="restartBtn" style="width:100%">
             🔄 Chơi lại
         </button>
+
         <button class="secondary" id="resultHomeBtn"
                 style="width:100%;margin-top:8px">
             🏠 Trang chủ
@@ -334,14 +343,13 @@ select {
     </div>
 
     <div class="footer">
-        🐭 Chuột thường +1 | 🐹 Hamster +3 | 💣 Bom = thua ngay
+        🐭 +1 điểm | 🐹 +3 điểm | 💣 Trúng bom mất 1 tim
     </div>
 </div>
 
-<!-- Nhạc được tải từ GitHub -->
-<audio id="music" loop preload="none"
-src="https://raw.githubusercontent.com/honghoasamsunglt2-tech/game-dap-chuot/main/ngoc83.mp3">
-</audio>
+<audio id="music"
+    src="https://raw.githubusercontent.com/honghoasamsunglt2-tech/game-dap-chuot/main/ngoc83.mp3"
+    loop preload="auto"></audio>
 
 <script>
 (function () {
@@ -350,7 +358,6 @@ src="https://raw.githubusercontent.com/honghoasamsunglt2-tech/game-dap-chuot/mai
     const menu = $("menu");
     const playArea = $("playArea");
     const result = $("result");
-    const board = $("board");
     const holes = Array.from(document.querySelectorAll(".hole"));
     const music = $("music");
 
@@ -386,7 +393,8 @@ src="https://raw.githubusercontent.com/honghoasamsunglt2-tech/game-dap-chuot/mai
 
     function updateHUD() {
         $("score").textContent = score;
-        $("lives").textContent = "❤️".repeat(lives) + "🖤".repeat(3 - lives);
+        $("lives").textContent =
+            "❤️".repeat(lives) + "🖤".repeat(3 - lives);
         $("time").textContent = seconds;
     }
 
@@ -401,12 +409,14 @@ src="https://raw.githubusercontent.com/honghoasamsunglt2-tech/game-dap-chuot/mai
     }
 
     function clearBoard() {
-        holes.forEach(hole => {
-            hole.replaceChildren();
-        });
-
+        holes.forEach(hole => hole.replaceChildren());
         currentIndex = -1;
         currentType = "";
+    }
+
+    function stopMusic() {
+        music.pause();
+        music.currentTime = 0;
     }
 
     function playMusic() {
@@ -414,12 +424,8 @@ src="https://raw.githubusercontent.com/honghoasamsunglt2-tech/game-dap-chuot/mai
 
         music.play().catch(() => {
             $("message").textContent =
-                "Nhấn nút nhạc rồi bắt đầu để nghe nhạc 🎵";
+                "Không phát được nhạc. Kiểm tra file ngoc83.mp3 nhé!";
         });
-    }
-
-    function stopMusic() {
-        music.pause();
     }
 
     function updateMusicButton() {
@@ -441,6 +447,7 @@ src="https://raw.githubusercontent.com/honghoasamsunglt2-tech/game-dap-chuot/mai
     function showCreature(index, type, thisRound) {
         if (!running || paused || thisRound !== roundId) return;
 
+        clearTimeout(clearTimer);
         clearBoard();
 
         currentIndex = index;
@@ -459,12 +466,17 @@ src="https://raw.githubusercontent.com/honghoasamsunglt2-tech/game-dap-chuot/mai
 
         holes[index].appendChild(character);
 
+        const visibleTime = Math.max(
+            650,
+            Number($("difficulty").value) - 150
+        );
+
         clearTimer = setTimeout(() => {
             if (thisRound !== roundId || !running || paused) return;
 
             clearBoard();
             clearTimer = null;
-        }, Math.max(650, Number($("difficulty").value) - 150));
+        }, visibleTime);
     }
 
     function spawnCreature(thisRound) {
@@ -565,7 +577,7 @@ src="https://raw.githubusercontent.com/honghoasamsunglt2-tech/game-dap-chuot/mai
         if (paused) {
             stopTimers();
             clearBoard();
-            stopMusic();
+            music.pause();
 
             $("pauseBtn").textContent = "▶️ Tiếp tục";
             $("message").textContent = "⏸️ Đang tạm dừng";
@@ -595,7 +607,8 @@ src="https://raw.githubusercontent.com/honghoasamsunglt2-tech/game-dap-chuot/mai
     }
 
     function hitHole(index) {
-        if (!running || paused || currentIndex !== index || !currentType) {
+        if (!running || paused ||
+            currentIndex !== index || !currentType) {
             return;
         }
 
@@ -606,7 +619,16 @@ src="https://raw.githubusercontent.com/honghoasamsunglt2-tech/game-dap-chuot/mai
         clearBoard();
 
         if (type === "bomb") {
-            endGame("💥 DÍNH BOM! THUA RỒI!");
+            lives--;
+            updateHUD();
+
+            if (lives <= 0) {
+                endGame("💥 HẾT TIM RỒI!");
+            } else {
+                $("message").textContent =
+                    "💣 BÙM! Em mất 1 tim! Còn " + lives + " tim.";
+            }
+
             return;
         }
 
@@ -619,9 +641,6 @@ src="https://raw.githubusercontent.com/honghoasamsunglt2-tech/game-dap-chuot/mai
         }
 
         updateHUD();
-
-        // Tăng tốc độ xuất hiện một chút theo tiến trình,
-        // nhưng không vượt quá tốc độ đã chọn.
     }
 
     holes.forEach((hole, index) => {
@@ -636,14 +655,12 @@ src="https://raw.githubusercontent.com/honghoasamsunglt2-tech/game-dap-chuot/mai
 
     $("musicBtn").addEventListener("click", () => {
         setMusic(!musicOn);
-        if (musicOn) {
-            playMusic();
-        }
+        if (musicOn) playMusic();
     });
 
     music.addEventListener("error", () => {
         $("message").textContent =
-            "Không tải được nhạc. Kiểm tra file ngoc83.mp3 trên GitHub nhé!";
+            "Không tải được nhạc. Kiểm tra đường dẫn GitHub nhé!";
     });
 
     updateHUD();
@@ -655,10 +672,3 @@ src="https://raw.githubusercontent.com/honghoasamsunglt2-tech/game-dap-chuot/mai
 """
 
 components.html(game, height=800, scrolling=False)
-
-st.markdown(
-    "<div style='text-align:center;color:#9ca3af;font-size:12px'>"
-    "🐭 Chúc bạn chơi vui vẻ! 🐹"
-    "</div>",
-    unsafe_allow_html=True
-)
