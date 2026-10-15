@@ -3,7 +3,7 @@ import streamlit.components.v1 as components
 
 st.set_page_config(
     page_title="Game đập chuột",
-    page_icon="🐭",
+    page_icon="🐹",
     layout="centered"
 )
 
@@ -12,7 +12,7 @@ game = r"""
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 * {
@@ -22,250 +22,225 @@ game = r"""
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: #8bd66b;
+    color: white;
+    background: #111827;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 #game {
-    position: relative;
-    width: 100%;
-    max-width: 520px;
-    height: 780px;
-    max-height: 95vh;
+    max-width: 600px;
     margin: auto;
-    overflow: hidden;
-    border: 4px solid #d5ffc3;
-    border-radius: 22px;
-    background:
-        radial-gradient(ellipse at top, #b9f58b, transparent 60%),
-        linear-gradient(#75ca55, #368c35);
-    box-shadow: 0 0 25px #d8ffc7;
-}
-
-#menu, #over, #countdown, #pauseScreen {
-    position: absolute;
-    inset: 0;
-    z-index: 20;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 18px;
+    padding: 12px;
     text-align: center;
-    background: #246c36d9;
-}
-
-.panel {
-    width: 100%;
-    padding: 25px 17px;
-    border: 3px solid #caffb5;
-    border-radius: 25px;
-    background: linear-gradient(145deg, #a7ed85, #4ca94c);
-    box-shadow: 0 0 25px #caffb5;
 }
 
 h1 {
-    margin: 0 0 12px;
-    color: #155b27;
-    font-size: clamp(32px, 8vw, 45px);
-    font-weight: 900;
-    font-style: italic;
-    text-shadow: 2px 3px #caffb5;
+    color: #fbbf24;
+    font-size: clamp(25px, 6vw, 36px);
+    margin: 8px 0;
+    text-shadow: 0 0 12px #f59e0b;
 }
 
-.sub {
-    color: #164e22;
+.subtitle {
+    color: #cbd5e1;
+    margin-bottom: 15px;
+}
+
+.panel {
+    background: #1f2937;
+    border: 2px solid #374151;
+    border-radius: 18px;
+    padding: 13px;
+    margin-bottom: 12px;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+
+.stat {
+    background: #111827;
+    border-radius: 12px;
+    padding: 10px 3px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+.stat-value {
+    font-size: 21px;
     font-weight: bold;
-    margin-bottom: 20px;
+    margin-top: 5px;
 }
 
-.btn {
-    width: 100%;
-    margin: 7px 0;
-    padding: 13px 10px;
-    border: 2px solid #d5ffc4;
-    border-radius: 14px;
-    background: #237d39;
-    color: white;
-    font-size: 17px;
+#lives {
+    color: #fb7185;
+}
+
+#score {
+    color: #fbbf24;
+}
+
+#time {
+    color: #67e8f9;
+}
+
+button, select {
+    border: 0;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 15px;
     font-weight: bold;
     cursor: pointer;
 }
 
-.btn:active {
-    transform: scale(.97);
+button:active {
+    transform: scale(.96);
 }
 
-.row {
-    display: flex;
-    gap: 7px;
+.primary {
+    background: #fbbf24;
+    color: #111827;
 }
 
-.row .btn {
-    flex: 1;
-}
-
-#topbar {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    right: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 8;
-    gap: 4px;
-}
-
-.hud {
-    padding: 8px 7px;
-    background: #18592c;
+.secondary {
+    background: #374151;
     color: white;
-    border: 2px solid #caffb5;
-    border-radius: 12px;
-    font-weight: bold;
-    font-size: 14px;
 }
 
-#pauseBtn {
-    border: 2px solid #caffb5;
-    background: #18592c;
+.danger {
+    background: #ef4444;
     color: white;
-    border-radius: 10px;
-    padding: 7px 10px;
-    font-size: 20px;
 }
 
-#field {
-    position: absolute;
-    inset: 65px 8px 10px;
-    overflow: hidden;
+.music-button {
+    width: 100%;
+    margin-top: 10px;
+}
+
+#menu {
+    display: block;
+}
+
+#playArea {
+    display: none;
+}
+
+#board {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    padding: 12px;
+    background: #14532d;
+    border: 3px solid #22c55e;
     border-radius: 20px;
-    background:
-        radial-gradient(ellipse, #a4e66c 0%, #62b847 70%, #439d39 100%);
-    border: 2px solid #c7fba9;
 }
 
-.grass {
-    position: absolute;
-    width: 7px;
-    height: 15px;
-    background: #d3ff9c;
-    border-radius: 100%;
-    opacity: .7;
-}
-
-/* 9 CÁI LỖ: 3 HÀNG, MỖI HÀNG 3 LỖ */
 .hole {
-    position: absolute;
-    width: 27%;
-    height: 90px;
+    aspect-ratio: 1 / 1;
+    min-width: 0;
+    position: relative;
+    overflow: hidden;
+    border-radius: 50%;
+    background: #422006;
+    border: 5px solid #713f12;
+    box-shadow: inset 0 5px 12px #0008;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
+    font-size: clamp(36px, 10vw, 58px);
+    cursor: pointer;
+    touch-action: manipulation;
 }
 
 .hole::before {
     content: "";
     position: absolute;
-    width: 90%;
-    height: 42px;
-    bottom: 0;
+    inset: 10%;
     border-radius: 50%;
-    background: #58351d;
-    border: 5px solid #93613a;
-    box-shadow: inset 0 5px 8px #241509;
-    z-index: 2;
+    background: #1c1917;
+    z-index: 0;
 }
 
-/* Chuột xuất hiện ở giữa lỗ */
-.mouse {
-    position: absolute;
-    z-index: 4;
-    bottom: 8px;
-    width: 82px;
-    height: 78px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 55px;
-    cursor: pointer;
-    user-select: none;
-    -webkit-user-select: none;
-    touch-action: manipulation;
-    animation: pop .15s ease-out;
+.character {
+    position: relative;
+    z-index: 1;
+    animation: pop .13s ease-out;
+    line-height: 1;
 }
 
 @keyframes pop {
-    from {
-        transform: translateY(30px) scale(.7);
-    }
-    to {
-        transform: translateY(0) scale(1);
-    }
-}
-
-.fall {
-    animation: fall .65s ease-in forwards, shake .12s linear infinite;
-}
-
-@keyframes fall {
-    to {
-        transform: translateY(80px) rotate(20deg);
-        opacity: .15;
-    }
-}
-
-@keyframes shake {
-    0%,100% { margin-left: 0; }
-    25% { margin-left: -5px; }
-    75% { margin-left: 5px; }
+    from { transform: translateY(25px) scale(.7); }
+    to { transform: translateY(0) scale(1); }
 }
 
 #message {
-    position: absolute;
-    top: 40%;
-    left: 0;
-    right: 0;
-    z-index: 10;
-    text-align: center;
-    font-size: 35px;
-    font-weight: 900;
+    min-height: 27px;
+    margin: 10px 0;
+    font-weight: bold;
+    color: #fde68a;
+}
+
+.controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.controls button {
+    width: 100%;
+}
+
+select {
+    width: 100%;
+    background: #111827;
     color: white;
-    text-shadow: 2px 3px #286c2b;
-    pointer-events: none;
-}
-
-.hidden {
-    display: none !important;
-}
-
-.big {
-    color: #fff;
-    font-size: 38px;
-    font-weight: 900;
-    text-shadow: 2px 3px #286c2b;
+    margin-top: 8px;
+    border: 1px solid #4b5563;
 }
 
 .small {
-    color: #164e22;
-    font-size: 14px;
-    line-height: 1.5;
+    color: #cbd5e1;
+    font-size: 13px;
+    line-height: 1.6;
 }
 
-@media(max-height: 650px) {
+#result {
+    display: none;
+    margin-top: 12px;
+    padding: 15px;
+    border-radius: 15px;
+    background: #312e81;
+}
+
+#result h2 {
+    color: #fde68a;
+}
+
+.footer {
+    color: #9ca3af;
+    font-size: 12px;
+    margin-top: 12px;
+}
+
+@media (max-width: 360px) {
     #game {
-        height: 95vh;
+        padding: 6px;
     }
 
-    .panel {
-        padding: 14px;
+    #board {
+        gap: 6px;
+        padding: 8px;
     }
 
-    h1 {
-        font-size: 30px;
-    }
-
-    .btn {
-        padding: 9px;
+    .hole {
+        border-width: 3px;
     }
 }
 </style>
@@ -274,388 +249,405 @@ h1 {
 <body>
 <div id="game">
 
-    <div id="topbar" class="hidden">
-        <div class="hud" id="lives">3❤️</div>
-        <div class="hud" id="score">⭐ 0</div>
-        <div class="hud" id="timer">⏱ 60</div>
-        <button id="pauseBtn">☰</button>
+    <h1>🐹 GAME ĐẬP CHUỘT 🐭</h1>
+    <div class="subtitle">Nhanh tay lẹ mắt — coi chừng bom! 💣</div>
+
+    <div class="panel">
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-label">⭐ ĐIỂM</div>
+                <div class="stat-value" id="score">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">❤️ MẠNG</div>
+                <div class="stat-value" id="lives">❤️❤️❤️</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">⏱️ THỜI GIAN</div>
+                <div class="stat-value" id="time">30</div>
+            </div>
+        </div>
     </div>
 
-    <div id="field" class="hidden">
-        <div id="message"></div>
+    <div id="menu" class="panel">
+        <h2>🎯 Sẵn sàng chưa?</h2>
+        <p>🐭 Chuột thường: +1 điểm</p>
+        <p>🐹 Hamster: +3 điểm</p>
+        <p>💣 Đập trúng bom: THUA NGAY!</p>
+        <p>❤️ Em có 3 mạng và 30 giây để ghi điểm.</p>
 
-        <!-- HÀNG 1 -->
-        <div class="hole" style="left:3%;top:10%" data-hole="0"></div>
-        <div class="hole" style="left:36.5%;top:10%" data-hole="1"></div>
-        <div class="hole" style="left:70%;top:10%" data-hole="2"></div>
+        <label for="difficulty">Chọn độ khó:</label>
+        <select id="difficulty">
+            <option value="3000">Dễ — 3 giây</option>
+            <option value="2500" selected>Vừa — 2,5 giây</option>
+            <option value="1000">Khó — 1 giây</option>
+        </select>
 
-        <!-- HÀNG 2 -->
-        <div class="hole" style="left:3%;top:38%" data-hole="3"></div>
-        <div class="hole" style="left:36.5%;top:38%" data-hole="4"></div>
-        <div class="hole" style="left:70%;top:38%" data-hole="5"></div>
+        <button class="primary" id="startBtn"
+                style="width:100%;margin-top:12px">
+            🎮 BẮT ĐẦU
+        </button>
 
-        <!-- HÀNG 3 -->
-        <div class="hole" style="left:3%;top:66%" data-hole="6"></div>
-        <div class="hole" style="left:36.5%;top:66%" data-hole="7"></div>
-        <div class="hole" style="left:70%;top:66%" data-hole="8"></div>
+        <button class="secondary music-button" id="musicBtn">
+            🔇 Bật nhạc
+        </button>
+
+        <p class="small">
+            Nhớ né bom nhaaa! Chúc em đạt điểm cao! 🏆
+        </p>
     </div>
 
-    <div id="menu">
+    <div id="playArea">
         <div class="panel">
-            <h1>🐭 Game<br>đập chuột</h1>
-            <div class="sub">🌿 ĐỒNG CỎ VUI NHỘN 🌿</div>
-
-            <p style="color:#164e22;font-weight:bold">Chọn độ khó</p>
-
-            <div class="row">
-                <button class="btn difficulty" data-delay="3000">DỄ</button>
-                <button class="btn difficulty" data-delay="2500">VỪA</button>
-                <button class="btn difficulty" data-delay="1000">KHÓ</button>
+            <div id="board">
+                <button class="hole" data-index="0" aria-label="Ô 1"></button>
+                <button class="hole" data-index="1" aria-label="Ô 2"></button>
+                <button class="hole" data-index="2" aria-label="Ô 3"></button>
+                <button class="hole" data-index="3" aria-label="Ô 4"></button>
+                <button class="hole" data-index="4" aria-label="Ô 5"></button>
+                <button class="hole" data-index="5" aria-label="Ô 6"></button>
+                <button class="hole" data-index="6" aria-label="Ô 7"></button>
+                <button class="hole" data-index="7" aria-label="Ô 8"></button>
+                <button class="hole" data-index="8" aria-label="Ô 9"></button>
             </div>
 
-            <button class="btn" id="soundBtn">🔊 ÂM THANH: BẬT</button>
-            <button class="btn" id="startBtn">▶ BẮT ĐẦU</button>
+            <div id="message">Bắt đầu đập chuột thôi!</div>
 
-            <p class="small">
-                🐭 Đập chuột để ghi điểm!<br>
-                ❤️ Em có 3 mạng, thời gian chơi 60 giây.<br>
-                📱 Chạm chuột hoặc 💻 nhấn chuột trái.
-            </p>
+            <div class="controls">
+                <button class="secondary" id="pauseBtn">⏸️ Tạm dừng</button>
+                <button class="secondary" id="homeBtn">🏠 Trang chủ</button>
+            </div>
         </div>
     </div>
 
-    <div id="countdown" class="hidden">
-        <div class="panel">
-            <div class="big" id="countNum">3</div>
-            <p style="color:#164e22;font-weight:bold">Chuẩn bị đập chuột!</p>
-        </div>
+    <div id="result">
+        <h2 id="resultTitle">🎉 KẾT THÚC!</h2>
+        <p id="resultScore"></p>
+        <p id="bestScore"></p>
+        <button class="primary" id="restartBtn" style="width:100%">
+            🔄 Chơi lại
+        </button>
+        <button class="secondary" id="resultHomeBtn"
+                style="width:100%;margin-top:8px">
+            🏠 Trang chủ
+        </button>
     </div>
 
-    <div id="pauseScreen" class="hidden">
-        <div class="panel">
-            <h1>⏸ Tạm dừng</h1>
-            <button class="btn" id="resumeBtn">▶ TIẾP TỤC</button>
-            <button class="btn" id="homeBtn">🏠 VỀ MENU CHÍNH</button>
-        </div>
-    </div>
-
-    <div id="over" class="hidden">
-        <div class="panel">
-            <h1 id="overTitle">Hết thời gian!</h1>
-            <div class="big">⭐ <span id="finalScore">0</span></div>
-            <p style="color:#164e22;font-weight:bold">Điểm của em</p>
-            <p style="color:#164e22">🏆 Kỷ lục: <span id="best">0</span></p>
-            <button class="btn" id="againBtn">🔁 CHƠI LẠI</button>
-            <button class="btn" id="overHomeBtn">🏠 VỀ MENU CHÍNH</button>
-        </div>
+    <div class="footer">
+        🐭 Chuột thường +1 | 🐹 Hamster +3 | 💣 Bom = thua ngay
     </div>
 </div>
 
-<audio id="music" src="ngoc83.mp3" loop preload="auto"></audio>
+<!-- Nhạc được tải từ GitHub -->
+<audio id="music" loop preload="none"
+src="https://raw.githubusercontent.com/honghoasamsunglt2-tech/game-dap-chuot/main/ngoc83.mp3">
+</audio>
 
 <script>
-(() => {
-const $ = id => document.getElementById(id);
-const field = $('field');
-const holes = Array.from(document.querySelectorAll('.hole'));
+(function () {
+    const $ = id => document.getElementById(id);
 
-let delay = 2500;
-let soundOn = true;
-let running = false;
-let paused = false;
-let score = 0;
-let lives = 3;
-let timeLeft = 60;
-let best = 0;
-let spawnTimer = null;
-let clockTimer = null;
-let countdownTimer = null;
-let mouseTimer = null;
-let currentMouse = null;
-let gameToken = 0;
+    const menu = $("menu");
+    const playArea = $("playArea");
+    const result = $("result");
+    const board = $("board");
+    const holes = Array.from(document.querySelectorAll(".hole"));
+    const music = $("music");
 
-try {
-    best = Number(localStorage.getItem('dapChuotBest') || 0);
-} catch(e) {}
+    let score = 0;
+    let lives = 3;
+    let seconds = 30;
+    let running = false;
+    let paused = false;
+    let musicOn = false;
 
-document.querySelectorAll('.difficulty').forEach(btn => {
-    btn.onclick = () => {
-        delay = Number(btn.dataset.delay);
+    let spawnTimer = null;
+    let clockTimer = null;
+    let clearTimer = null;
 
-        document.querySelectorAll('.difficulty').forEach(b => {
-            b.style.background = '#237d39';
+    let currentIndex = -1;
+    let currentType = "";
+    let roundId = 0;
+    let best = loadBest();
+
+    function loadBest() {
+        try {
+            return Number(localStorage.getItem("dapChuotBest")) || 0;
+        } catch (e) {
+            return 0;
+        }
+    }
+
+    function saveBest(value) {
+        try {
+            localStorage.setItem("dapChuotBest", String(value));
+        } catch (e) {}
+    }
+
+    function updateHUD() {
+        $("score").textContent = score;
+        $("lives").textContent = "❤️".repeat(lives) + "🖤".repeat(3 - lives);
+        $("time").textContent = seconds;
+    }
+
+    function stopTimers() {
+        clearInterval(spawnTimer);
+        clearInterval(clockTimer);
+        clearTimeout(clearTimer);
+
+        spawnTimer = null;
+        clockTimer = null;
+        clearTimer = null;
+    }
+
+    function clearBoard() {
+        holes.forEach(hole => {
+            hole.replaceChildren();
         });
 
-        btn.style.background = '#174c26';
-    };
-});
-
-$('soundBtn').onclick = () => {
-    soundOn = !soundOn;
-
-    $('soundBtn').textContent =
-        soundOn ? '🔊 ÂM THANH: BẬT' : '🔇 ÂM THANH: TẮT';
-
-    if (!soundOn) {
-        $('music').pause();
-    } else if (running && !paused) {
-        playMusic();
-    }
-};
-
-function playMusic() {
-    if (soundOn) {
-        $('music').play().catch(() => {});
-    }
-}
-
-function stopTimers() {
-    clearInterval(spawnTimer);
-    clearInterval(clockTimer);
-    clearInterval(countdownTimer);
-    clearTimeout(mouseTimer);
-
-    spawnTimer = null;
-    clockTimer = null;
-    countdownTimer = null;
-    mouseTimer = null;
-}
-
-function removeMouse() {
-    if (currentMouse) {
-        currentMouse.remove();
+        currentIndex = -1;
+        currentType = "";
     }
 
-    currentMouse = null;
-}
+    function playMusic() {
+        if (!musicOn || !running || paused) return;
 
-function resetGame() {
-    gameToken++;
-    stopTimers();
-    removeMouse();
+        music.play().catch(() => {
+            $("message").textContent =
+                "Nhấn nút nhạc rồi bắt đầu để nghe nhạc 🎵";
+        });
+    }
 
-    score = 0;
-    lives = 3;
-    timeLeft = 60;
-    running = false;
-    paused = false;
+    function stopMusic() {
+        music.pause();
+    }
 
-    $('score').textContent = '⭐ 0';
-    $('lives').textContent = '3❤️';
-    $('timer').textContent = '⏱ 60';
+    function updateMusicButton() {
+        $("musicBtn").textContent =
+            musicOn ? "🔊 Tắt nhạc" : "🔇 Bật nhạc";
+    }
 
-    $('menu').classList.add('hidden');
-    $('over').classList.add('hidden');
-    $('pauseScreen').classList.add('hidden');
-    $('topbar').classList.remove('hidden');
-    field.classList.remove('hidden');
-    $('countdown').classList.remove('hidden');
-    $('message').textContent = '';
+    function setMusic(enabled) {
+        musicOn = enabled;
+        updateMusicButton();
 
-    let n = 3;
-    $('countNum').textContent = n;
-
-    const token = gameToken;
-
-    countdownTimer = setInterval(() => {
-        if (token !== gameToken) return;
-
-        n--;
-
-        if (n > 0) {
-            $('countNum').textContent = n;
+        if (musicOn && running && !paused) {
+            playMusic();
         } else {
-            clearInterval(countdownTimer);
-            countdownTimer = null;
-
-            $('countdown').classList.add('hidden');
-            beginGame();
+            stopMusic();
         }
-    }, 1000);
-}
+    }
 
-function beginGame() {
-    running = true;
-    paused = false;
+    function showCreature(index, type, thisRound) {
+        if (!running || paused || thisRound !== roundId) return;
 
-    playMusic();
-    spawnMouse();
+        clearBoard();
 
-    spawnTimer = setInterval(() => {
-        if (running && !paused) {
-            spawnMouse();
+        currentIndex = index;
+        currentType = type;
+
+        const character = document.createElement("span");
+        character.className = "character";
+
+        if (type === "mouse") {
+            character.textContent = "🐭";
+        } else if (type === "hamster") {
+            character.textContent = "🐹";
+        } else {
+            character.textContent = "💣";
         }
-    }, delay);
 
-    clockTimer = setInterval(() => {
-        if (!running || paused) return;
+        holes[index].appendChild(character);
 
-        timeLeft--;
-        $('timer').textContent = '⏱ ' + timeLeft;
+        clearTimer = setTimeout(() => {
+            if (thisRound !== roundId || !running || paused) return;
 
-        if (timeLeft <= 0) {
-            finish('Hết thời gian!');
+            clearBoard();
+            clearTimer = null;
+        }, Math.max(650, Number($("difficulty").value) - 150));
+    }
+
+    function spawnCreature(thisRound) {
+        if (!running || paused || thisRound !== roundId) return;
+
+        const index = Math.floor(Math.random() * holes.length);
+        const roll = Math.random();
+
+        let type;
+
+        if (roll < 0.14) {
+            type = "bomb";
+        } else if (roll < 0.42) {
+            type = "hamster";
+        } else {
+            type = "mouse";
         }
-    }, 1000);
-}
 
-/* CHỌN NGẪU NHIÊN 1 TRONG 9 LỖ */
-function spawnMouse() {
-    if (!running || paused) return;
+        showCreature(index, type, thisRound);
+    }
 
-    removeMouse();
-    clearTimeout(mouseTimer);
-
-    const hole = holes[Math.floor(Math.random() * holes.length)];
-
-    const m = document.createElement('div');
-    m.className = 'mouse';
-    m.textContent = Math.random() < 0.15 ? '🐹' : '🐭';
-    m.setAttribute('role', 'button');
-    m.setAttribute('aria-label', 'Đập chuột');
-
-    hole.appendChild(m);
-    currentMouse = m;
-
-    m.onclick = e => {
-        e.stopPropagation();
-
-        if (!running || paused || currentMouse !== m) return;
-
-        score += m.textContent === '🐹' ? 3 : 1;
-        $('score').textContent = '⭐ ' + score;
-
-        m.classList.add('fall');
-        m.textContent = '🔨';
-
-        currentMouse = null;
-        clearTimeout(mouseTimer);
-
-        mouseTimer = setTimeout(() => {
-            m.remove();
-        }, 600);
-
-        // Sau khi đập trúng, chuột mới xuất hiện ở một lỗ ngẫu nhiên
-        clearInterval(spawnTimer);
+    function startTimers() {
+        const thisRound = roundId;
+        const interval = Number($("difficulty").value);
 
         spawnTimer = setInterval(() => {
-            if (running && !paused) {
-                spawnMouse();
+            spawnCreature(thisRound);
+        }, interval);
+
+        clockTimer = setInterval(() => {
+            if (!running || paused || thisRound !== roundId) return;
+
+            seconds--;
+            updateHUD();
+
+            if (seconds <= 0) {
+                endGame("⏰ HẾT GIỜ!");
             }
-        }, delay);
+        }, 1000);
 
-        setTimeout(() => {
-            if (running && !paused) {
-                spawnMouse();
-            }
-        }, 300);
-    };
+        spawnCreature(thisRound);
+    }
 
-    // Chuột biến mất sau thời gian quy định; không đập trúng sẽ mất 1 mạng
-    mouseTimer = setTimeout(() => {
-        if (currentMouse === m && running && !paused) {
-            m.remove();
-            currentMouse = null;
+    function startGame() {
+        stopTimers();
+        roundId++;
 
-            lives--;
-            $('lives').textContent = lives + '❤️';
+        score = 0;
+        lives = 3;
+        seconds = 30;
+        running = true;
+        paused = false;
 
-            if (lives <= 0) {
-                finish('Hết mạng!');
-            }
+        updateHUD();
+        clearBoard();
+
+        menu.style.display = "none";
+        result.style.display = "none";
+        playArea.style.display = "block";
+
+        $("pauseBtn").textContent = "⏸️ Tạm dừng";
+        $("message").textContent = "Nhanh tay lên nào!";
+
+        startTimers();
+        playMusic();
+    }
+
+    function endGame(title) {
+        if (!running) return;
+
+        running = false;
+        paused = false;
+        roundId++;
+
+        stopTimers();
+        clearBoard();
+        stopMusic();
+
+        if (score > best) {
+            best = score;
+            saveBest(best);
         }
-    }, delay);
-}
 
-function finish(title) {
-    if (!running) return;
+        playArea.style.display = "none";
+        menu.style.display = "none";
+        result.style.display = "block";
 
-    running = false;
-    paused = false;
-
-    stopTimers();
-    removeMouse();
-
-    $('music').pause();
-    $('countdown').classList.add('hidden');
-    $('pauseScreen').classList.add('hidden');
-    $('over').classList.remove('hidden');
-    $('overTitle').textContent = title;
-    $('finalScore').textContent = score;
-
-    if (score > best) {
-        best = score;
-
-        try {
-            localStorage.setItem('dapChuotBest', String(best));
-        } catch(e) {}
+        $("resultTitle").textContent = title;
+        $("resultScore").textContent = "Điểm của em: " + score;
+        $("bestScore").textContent = "🏆 Kỷ lục: " + best;
     }
 
-    $('best').textContent = best;
-}
+    function pauseGame() {
+        if (!running) return;
 
-$('startBtn').onclick = resetGame;
-$('againBtn').onclick = resetGame;
+        paused = !paused;
 
-$('pauseBtn').onclick = () => {
-    if (!running || paused) {
-        if (paused) resumeGame();
-        return;
+        if (paused) {
+            stopTimers();
+            clearBoard();
+            stopMusic();
+
+            $("pauseBtn").textContent = "▶️ Tiếp tục";
+            $("message").textContent = "⏸️ Đang tạm dừng";
+        } else {
+            $("pauseBtn").textContent = "⏸️ Tạm dừng";
+            $("message").textContent = "Tiếp tục nào!";
+
+            startTimers();
+            playMusic();
+        }
     }
 
-    paused = true;
-    $('pauseScreen').classList.remove('hidden');
-    $('music').pause();
-};
+    function goHome() {
+        running = false;
+        paused = false;
+        roundId++;
 
-function resumeGame() {
-    if (!paused) return;
+        stopTimers();
+        clearBoard();
+        stopMusic();
 
-    paused = false;
-    $('pauseScreen').classList.add('hidden');
-    playMusic();
-}
+        playArea.style.display = "none";
+        result.style.display = "none";
+        menu.style.display = "block";
 
-$('resumeBtn').onclick = resumeGame;
-
-function home() {
-    gameToken++;
-    running = false;
-    paused = false;
-
-    stopTimers();
-    removeMouse();
-
-    $('music').pause();
-    $('music').currentTime = 0;
-
-    $('menu').classList.remove('hidden');
-    $('over').classList.add('hidden');
-    $('pauseScreen').classList.add('hidden');
-    $('countdown').classList.add('hidden');
-    $('topbar').classList.add('hidden');
-    field.classList.add('hidden');
-}
-
-$('homeBtn').onclick = home;
-$('overHomeBtn').onclick = home;
-
-document.addEventListener('keydown', e => {
-    if (
-        e.code === 'Space' &&
-        !$('menu').classList.contains('hidden')
-    ) {
-        e.preventDefault();
-        resetGame();
+        updateHUD();
     }
 
-    if (e.key === 'Escape' && running && !paused) {
-        paused = true;
-        $('pauseScreen').classList.remove('hidden');
-        $('music').pause();
-    }
-});
+    function hitHole(index) {
+        if (!running || paused || currentIndex !== index || !currentType) {
+            return;
+        }
 
+        const type = currentType;
+
+        clearTimeout(clearTimer);
+        clearTimer = null;
+        clearBoard();
+
+        if (type === "bomb") {
+            endGame("💥 DÍNH BOM! THUA RỒI!");
+            return;
+        }
+
+        if (type === "hamster") {
+            score += 3;
+            $("message").textContent = "🐹 +3 điểm! Giỏi quá!";
+        } else {
+            score += 1;
+            $("message").textContent = "🐭 +1 điểm!";
+        }
+
+        updateHUD();
+
+        // Tăng tốc độ xuất hiện một chút theo tiến trình,
+        // nhưng không vượt quá tốc độ đã chọn.
+    }
+
+    holes.forEach((hole, index) => {
+        hole.addEventListener("click", () => hitHole(index));
+    });
+
+    $("startBtn").addEventListener("click", startGame);
+    $("restartBtn").addEventListener("click", startGame);
+    $("pauseBtn").addEventListener("click", pauseGame);
+    $("homeBtn").addEventListener("click", goHome);
+    $("resultHomeBtn").addEventListener("click", goHome);
+
+    $("musicBtn").addEventListener("click", () => {
+        setMusic(!musicOn);
+        if (musicOn) {
+            playMusic();
+        }
+    });
+
+    music.addEventListener("error", () => {
+        $("message").textContent =
+            "Không tải được nhạc. Kiểm tra file ngoc83.mp3 trên GitHub nhé!";
+    });
+
+    updateHUD();
+    updateMusicButton();
 })();
 </script>
 </body>
@@ -663,3 +655,11 @@ document.addEventListener('keydown', e => {
 """
 
 components.html(game, height=800, scrolling=False)
+"""
+
+st.markdown(
+    "<div style='text-align:center;color:#9ca3af;font-size:12px'>"
+    "🐭 Chúc bạn chơi vui vẻ! 🐹"
+    "</div>",
+    unsafe_allow_html=True
+)
