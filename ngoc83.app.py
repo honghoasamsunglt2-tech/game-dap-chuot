@@ -1,111 +1,665 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-st.set_page_config(page_title="Game đập chuột", page_icon="🐭", layout="centered")
+st.set_page_config(
+    page_title="Game đập chuột",
+    page_icon="🐭",
+    layout="centered"
+)
 
 game = r"""
 <!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;font-family:Arial,sans-serif;background:#b5f58d;overflow:hidden;color:white;user-select:none}
-#game{width:100%;max-width:680px;height:760px;max-height:95vh;min-height:520px;margin:auto;position:relative;overflow:hidden;border:6px solid #c9ff9f;border-radius:25px;background:radial-gradient(ellipse,#91e85d,#54b83d 70%,#318b2b);box-shadow:0 0 24px #83ff68}
-#menu,#gameover,#pauseScreen{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:22px;background:rgba(39,132,35,.3);backdrop-filter:blur(3px)}
-#menu h1{font-size:clamp(32px,8vw,53px);font-style:italic;font-weight:1000;line-height:1.2;text-shadow:0 0 5px #65ff47,0 0 15px #4dff36,3px 4px #258b28;margin:0 0 12px}
-button,select{border:3px solid #d6ffb5;border-radius:16px;padding:12px 16px;font-size:16px;font-weight:bold;color:#24762c;background:#f3ffe7;cursor:pointer}
-#startBtn{background:linear-gradient(#e0ff9a,#9bff6a);font-size:22px;padding:15px 38px;margin-top:15px;box-shadow:0 0 20px #d4ff9a}
-#hud{position:absolute;top:10px;left:10px;right:10px;display:flex;align-items:center;justify-content:space-between;gap:5px;z-index:5}
-.hudBox{border:2px solid white;border-radius:13px;background:rgba(23,98,30,.78);padding:8px;font-size:15px;font-weight:bold}
-#menuBtn{color:white;background:rgba(24,91,25,.8);border:2px solid white;padding:6px 11px;font-size:22px}
-#field{position:absolute;top:90px;bottom:18px;left:5%;right:5%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:10px 7px}
-.hole{position:relative;min-width:0;min-height:0;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;cursor:pointer;touch-action:manipulation}
-.hole:before{content:"";position:absolute;bottom:7%;left:4%;width:92%;height:34%;border-radius:50%;background:radial-gradient(ellipse,#173719 0%,#2b4e21 62%,#6cbd43 66%,#8de25c 75%);border:3px solid #b7f57e;z-index:2}
-.mouse{position:absolute;z-index:1;bottom:16%;left:50%;transform:translate(-50%,110%);font-size:clamp(42px,10vw,66px);line-height:1;transition:transform .13s;padding:5px}
-.hole.up .mouse{transform:translate(-50%,-10%)}
-.hole.hit .mouse{transform:translate(-50%,120%) rotate(20deg) scale(.65)}
-#countdown{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-size:100px;font-weight:1000;text-shadow:0 0 25px #54ff34,3px 4px #267d25;z-index:12;pointer-events:none}
-#message{position:absolute;top:44%;width:100%;text-align:center;font-size:30px;font-weight:1000;text-shadow:0 2px 5px #256c21;z-index:10;pointer-events:none}
-#gameover h2,#pauseScreen h2{font-size:34px;margin:0 0 12px}
-.hidden{display:none!important}
-#soundBtn{position:absolute;bottom:8px;right:8px;z-index:8;padding:7px 10px;font-size:14px;background:rgba(29,100,31,.8);color:white;border:2px solid white}
-#game.shake{animation:shake .22s linear}
-@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
-@media(max-height:650px){#game{height:95vh;min-height:0}#field{top:78px}.hudBox{padding:6px;font-size:13px}}
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #8bd66b;
+}
+
+#game {
+    position: relative;
+    width: 100%;
+    max-width: 520px;
+    height: 780px;
+    max-height: 95vh;
+    margin: auto;
+    overflow: hidden;
+    border: 4px solid #d5ffc3;
+    border-radius: 22px;
+    background:
+        radial-gradient(ellipse at top, #b9f58b, transparent 60%),
+        linear-gradient(#75ca55, #368c35);
+    box-shadow: 0 0 25px #d8ffc7;
+}
+
+#menu, #over, #countdown, #pauseScreen {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    text-align: center;
+    background: #246c36d9;
+}
+
+.panel {
+    width: 100%;
+    padding: 25px 17px;
+    border: 3px solid #caffb5;
+    border-radius: 25px;
+    background: linear-gradient(145deg, #a7ed85, #4ca94c);
+    box-shadow: 0 0 25px #caffb5;
+}
+
+h1 {
+    margin: 0 0 12px;
+    color: #155b27;
+    font-size: clamp(32px, 8vw, 45px);
+    font-weight: 900;
+    font-style: italic;
+    text-shadow: 2px 3px #caffb5;
+}
+
+.sub {
+    color: #164e22;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.btn {
+    width: 100%;
+    margin: 7px 0;
+    padding: 13px 10px;
+    border: 2px solid #d5ffc4;
+    border-radius: 14px;
+    background: #237d39;
+    color: white;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn:active {
+    transform: scale(.97);
+}
+
+.row {
+    display: flex;
+    gap: 7px;
+}
+
+.row .btn {
+    flex: 1;
+}
+
+#topbar {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 8;
+    gap: 4px;
+}
+
+.hud {
+    padding: 8px 7px;
+    background: #18592c;
+    color: white;
+    border: 2px solid #caffb5;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+#pauseBtn {
+    border: 2px solid #caffb5;
+    background: #18592c;
+    color: white;
+    border-radius: 10px;
+    padding: 7px 10px;
+    font-size: 20px;
+}
+
+#field {
+    position: absolute;
+    inset: 65px 8px 10px;
+    overflow: hidden;
+    border-radius: 20px;
+    background:
+        radial-gradient(ellipse, #a4e66c 0%, #62b847 70%, #439d39 100%);
+    border: 2px solid #c7fba9;
+}
+
+.grass {
+    position: absolute;
+    width: 7px;
+    height: 15px;
+    background: #d3ff9c;
+    border-radius: 100%;
+    opacity: .7;
+}
+
+/* 9 CÁI LỖ: 3 HÀNG, MỖI HÀNG 3 LỖ */
+.hole {
+    position: absolute;
+    width: 27%;
+    height: 90px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.hole::before {
+    content: "";
+    position: absolute;
+    width: 90%;
+    height: 42px;
+    bottom: 0;
+    border-radius: 50%;
+    background: #58351d;
+    border: 5px solid #93613a;
+    box-shadow: inset 0 5px 8px #241509;
+    z-index: 2;
+}
+
+/* Chuột xuất hiện ở giữa lỗ */
+.mouse {
+    position: absolute;
+    z-index: 4;
+    bottom: 8px;
+    width: 82px;
+    height: 78px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 55px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    animation: pop .15s ease-out;
+}
+
+@keyframes pop {
+    from {
+        transform: translateY(30px) scale(.7);
+    }
+    to {
+        transform: translateY(0) scale(1);
+    }
+}
+
+.fall {
+    animation: fall .65s ease-in forwards, shake .12s linear infinite;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(80px) rotate(20deg);
+        opacity: .15;
+    }
+}
+
+@keyframes shake {
+    0%,100% { margin-left: 0; }
+    25% { margin-left: -5px; }
+    75% { margin-left: 5px; }
+}
+
+#message {
+    position: absolute;
+    top: 40%;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    text-align: center;
+    font-size: 35px;
+    font-weight: 900;
+    color: white;
+    text-shadow: 2px 3px #286c2b;
+    pointer-events: none;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.big {
+    color: #fff;
+    font-size: 38px;
+    font-weight: 900;
+    text-shadow: 2px 3px #286c2b;
+}
+
+.small {
+    color: #164e22;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+@media(max-height: 650px) {
+    #game {
+        height: 95vh;
+    }
+
+    .panel {
+        padding: 14px;
+    }
+
+    h1 {
+        font-size: 30px;
+    }
+
+    .btn {
+        padding: 9px;
+    }
+}
 </style>
 </head>
+
 <body>
 <div id="game">
-  <div id="menu">
-    <h1>🐭 Game đập chuột 🐭</h1><p><b>🌿 BÃI CỎ VUI NHỘN 🌿</b></p>
-    <p>Chọn độ khó:</p>
-    <select id="difficulty"><option value="3000">Dễ - 3 giây</option><option value="2500">Vừa - 2,5 giây</option><option value="1000">Khó - 1 giây</option></select>
-    <button id="startBtn">▶ BẮT ĐẦU</button>
-    <p>🔨 Chạm chuột trên lỗ để ghi điểm!</p><p>❤️ 3 mạng · ⏱️ 60 giây</p>
-  </div>
-  <div id="hud" class="hidden"><div class="hudBox" id="lives">❤️❤️❤️</div><div class="hudBox">⭐ <span id="score">0</span></div><div class="hudBox">⏱️ <span id="time">60</span>s</div><button id="menuBtn">☰</button></div>
-  <div id="field" class="hidden"></div><div id="countdown">3</div><div id="message"></div>
-  <button id="soundBtn">🔊 Âm thanh: Bật</button>
-  <div id="pauseScreen" class="hidden"><h2>⏸️ Đang tạm dừng</h2><button id="resumeBtn">▶ Chơi tiếp</button><br><button id="homeBtn">🏠 Về menu</button></div>
-  <div id="gameover" class="hidden"><h2 id="endTitle">⏰ Hết thời gian!</h2><p>Điểm: <span id="finalScore">0</span></p><p>🏆 Kỷ lục: <span id="bestScore">0</span></p><button id="retryBtn">🔄 Chơi lại</button><br><button id="backBtn">🏠 Về menu</button></div>
+
+    <div id="topbar" class="hidden">
+        <div class="hud" id="lives">3❤️</div>
+        <div class="hud" id="score">⭐ 0</div>
+        <div class="hud" id="timer">⏱ 60</div>
+        <button id="pauseBtn">☰</button>
+    </div>
+
+    <div id="field" class="hidden">
+        <div id="message"></div>
+
+        <!-- HÀNG 1 -->
+        <div class="hole" style="left:3%;top:10%" data-hole="0"></div>
+        <div class="hole" style="left:36.5%;top:10%" data-hole="1"></div>
+        <div class="hole" style="left:70%;top:10%" data-hole="2"></div>
+
+        <!-- HÀNG 2 -->
+        <div class="hole" style="left:3%;top:38%" data-hole="3"></div>
+        <div class="hole" style="left:36.5%;top:38%" data-hole="4"></div>
+        <div class="hole" style="left:70%;top:38%" data-hole="5"></div>
+
+        <!-- HÀNG 3 -->
+        <div class="hole" style="left:3%;top:66%" data-hole="6"></div>
+        <div class="hole" style="left:36.5%;top:66%" data-hole="7"></div>
+        <div class="hole" style="left:70%;top:66%" data-hole="8"></div>
+    </div>
+
+    <div id="menu">
+        <div class="panel">
+            <h1>🐭 Game<br>đập chuột</h1>
+            <div class="sub">🌿 ĐỒNG CỎ VUI NHỘN 🌿</div>
+
+            <p style="color:#164e22;font-weight:bold">Chọn độ khó</p>
+
+            <div class="row">
+                <button class="btn difficulty" data-delay="3000">DỄ</button>
+                <button class="btn difficulty" data-delay="2500">VỪA</button>
+                <button class="btn difficulty" data-delay="1000">KHÓ</button>
+            </div>
+
+            <button class="btn" id="soundBtn">🔊 ÂM THANH: BẬT</button>
+            <button class="btn" id="startBtn">▶ BẮT ĐẦU</button>
+
+            <p class="small">
+                🐭 Đập chuột để ghi điểm!<br>
+                ❤️ Em có 3 mạng, thời gian chơi 60 giây.<br>
+                📱 Chạm chuột hoặc 💻 nhấn chuột trái.
+            </p>
+        </div>
+    </div>
+
+    <div id="countdown" class="hidden">
+        <div class="panel">
+            <div class="big" id="countNum">3</div>
+            <p style="color:#164e22;font-weight:bold">Chuẩn bị đập chuột!</p>
+        </div>
+    </div>
+
+    <div id="pauseScreen" class="hidden">
+        <div class="panel">
+            <h1>⏸ Tạm dừng</h1>
+            <button class="btn" id="resumeBtn">▶ TIẾP TỤC</button>
+            <button class="btn" id="homeBtn">🏠 VỀ MENU CHÍNH</button>
+        </div>
+    </div>
+
+    <div id="over" class="hidden">
+        <div class="panel">
+            <h1 id="overTitle">Hết thời gian!</h1>
+            <div class="big">⭐ <span id="finalScore">0</span></div>
+            <p style="color:#164e22;font-weight:bold">Điểm của em</p>
+            <p style="color:#164e22">🏆 Kỷ lục: <span id="best">0</span></p>
+            <button class="btn" id="againBtn">🔁 CHƠI LẠI</button>
+            <button class="btn" id="overHomeBtn">🏠 VỀ MENU CHÍNH</button>
+        </div>
+    </div>
 </div>
+
+<audio id="music" src="ngoc83.mp3" loop preload="auto"></audio>
+
 <script>
-const $=id=>document.getElementById(id);
-let score=0,lives=3,timeLeft=60,best=0,delay=3000,running=false,paused=false,soundOn=true,active=-1;
-let spawnTimer=null,clockTimer=null,mouseTimer=null,countTimer=null,audioCtx=null,token=0,lifeLeft=0,mouseStart=0;
-try{best=Number(localStorage.getItem('dapChuotBest')||0)}catch(e){}
-const holes=[];
-for(let i=0;i<9;i++){
- const h=document.createElement('div');h.className='hole';h.innerHTML='<div class="mouse">🐭</div>';h.dataset.index=i;$('field').appendChild(h);holes.push(h);
- h.addEventListener('pointerdown',e=>{if(!running||paused||!h.classList.contains('up')||Number(h.dataset.token)!==token)return;e.preventDefault();hit(h)});
+(() => {
+const $ = id => document.getElementById(id);
+const field = $('field');
+const holes = Array.from(document.querySelectorAll('.hole'));
+
+let delay = 2500;
+let soundOn = true;
+let running = false;
+let paused = false;
+let score = 0;
+let lives = 3;
+let timeLeft = 60;
+let best = 0;
+let spawnTimer = null;
+let clockTimer = null;
+let countdownTimer = null;
+let mouseTimer = null;
+let currentMouse = null;
+let gameToken = 0;
+
+try {
+    best = Number(localStorage.getItem('dapChuotBest') || 0);
+} catch(e) {}
+
+document.querySelectorAll('.difficulty').forEach(btn => {
+    btn.onclick = () => {
+        delay = Number(btn.dataset.delay);
+
+        document.querySelectorAll('.difficulty').forEach(b => {
+            b.style.background = '#237d39';
+        });
+
+        btn.style.background = '#174c26';
+    };
+});
+
+$('soundBtn').onclick = () => {
+    soundOn = !soundOn;
+
+    $('soundBtn').textContent =
+        soundOn ? '🔊 ÂM THANH: BẬT' : '🔇 ÂM THANH: TẮT';
+
+    if (!soundOn) {
+        $('music').pause();
+    } else if (running && !paused) {
+        playMusic();
+    }
+};
+
+function playMusic() {
+    if (soundOn) {
+        $('music').play().catch(() => {});
+    }
 }
-function beep(freq=500,dur=.08){if(!soundOn)return;try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.frequency.value=freq;g.gain.value=.05;o.connect(g);g.connect(audioCtx.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+dur);o.stop(audioCtx.currentTime+dur)}catch(e){}}
-function clearTimers(){clearTimeout(spawnTimer);clearInterval(clockTimer);clearTimeout(mouseTimer);clearInterval(countTimer);spawnTimer=clockTimer=mouseTimer=countTimer=null}
-function clearMice(){holes.forEach(h=>{h.classList.remove('up','hit');h.dataset.token='';h.querySelector('.mouse').textContent='🐭'});active=-1}
-function update(){ $('score').textContent=score;$('time').textContent=timeLeft;$('lives').textContent='❤️'.repeat(Math.max(0,lives))+'🖤'.repeat(3-Math.max(0,lives))}
-function start(){
- clearTimers();clearMice();score=0;lives=3;timeLeft=60;delay=Number($('difficulty').value);running=false;paused=false;
- $('menu').classList.add('hidden');$('gameover').classList.add('hidden');$('pauseScreen').classList.add('hidden');$('hud').classList.remove('hidden');$('field').classList.remove('hidden');$('countdown').style.display='flex';update();
- let n=3;$('countdown').textContent=n;beep(440);
- countTimer=setInterval(()=>{n--;if(n>0){$('countdown').textContent=n;beep(440)}else{clearInterval(countTimer);countTimer=null;$('countdown').style.display='none';begin()}},1000)
+
+function stopTimers() {
+    clearInterval(spawnTimer);
+    clearInterval(clockTimer);
+    clearInterval(countdownTimer);
+    clearTimeout(mouseTimer);
+
+    spawnTimer = null;
+    clockTimer = null;
+    countdownTimer = null;
+    mouseTimer = null;
 }
-function begin(){running=true;paused=false;schedule(250);clockTimer=setInterval(()=>{if(!running||paused)return;timeLeft--;update();if(timeLeft<=0)end('time')},1000)}
-function schedule(wait){
- clearTimeout(spawnTimer);spawnTimer=setTimeout(()=>{
-  if(!running||paused)return;
-  const options=holes.map((h,i)=>i).filter(i=>i!==active);const idx=options[Math.floor(Math.random()*options.length)],h=holes[idx];
-  active=idx;token++;h.dataset.token=String(token);h.classList.remove('hit');h.classList.add('up');
-  const special=Math.random()<.12;h.querySelector('.mouse').textContent=special?'🐹':'🐭';h.dataset.points=special?'3':'1';
-  mouseStart=Date.now();lifeLeft=delay;
-  mouseTimer=setTimeout(()=>{if(!running||paused||active!==idx)return;h.classList.remove('up');active=-1;mouseTimer=null;lives--;update();beep(180,.13);if(lives<=0)end('lives');else schedule(250)},lifeLeft);
- },wait)
+
+function removeMouse() {
+    if (currentMouse) {
+        currentMouse.remove();
+    }
+
+    currentMouse = null;
 }
-function hit(h){
- if(!running||paused||active<0)return;clearTimeout(mouseTimer);mouseTimer=null;
- const pts=Number(h.dataset.points||1);score+=pts;active=-1;h.classList.remove('up');h.classList.add('hit');beep(pts===3?850:620);
- $('game').classList.remove('shake');void $('game').offsetWidth;$('game').classList.add('shake');$('message').textContent=pts===3?'+3 ĐIỂM! ✨':'+1 ĐIỂM!';
- setTimeout(()=>{$('message').textContent='';h.classList.remove('hit');h.querySelector('.mouse').textContent='🐭'},300);update();schedule(280)
+
+function resetGame() {
+    gameToken++;
+    stopTimers();
+    removeMouse();
+
+    score = 0;
+    lives = 3;
+    timeLeft = 60;
+    running = false;
+    paused = false;
+
+    $('score').textContent = '⭐ 0';
+    $('lives').textContent = '3❤️';
+    $('timer').textContent = '⏱ 60';
+
+    $('menu').classList.add('hidden');
+    $('over').classList.add('hidden');
+    $('pauseScreen').classList.add('hidden');
+    $('topbar').classList.remove('hidden');
+    field.classList.remove('hidden');
+    $('countdown').classList.remove('hidden');
+    $('message').textContent = '';
+
+    let n = 3;
+    $('countNum').textContent = n;
+
+    const token = gameToken;
+
+    countdownTimer = setInterval(() => {
+        if (token !== gameToken) return;
+
+        n--;
+
+        if (n > 0) {
+            $('countNum').textContent = n;
+        } else {
+            clearInterval(countdownTimer);
+            countdownTimer = null;
+
+            $('countdown').classList.add('hidden');
+            beginGame();
+        }
+    }, 1000);
 }
-function end(reason){
- if(!running)return;running=false;paused=false;clearTimers();clearMice();$('countdown').style.display='none';$('pauseScreen').classList.add('hidden');$('gameover').classList.remove('hidden');
- $('finalScore').textContent=score;if(score>best){best=score;try{localStorage.setItem('dapChuotBest',String(best))}catch(e){}}$('bestScore').textContent=best;$('endTitle').textContent=reason==='lives'?'💔 Hết mạng!':'⏰ Hết thời gian!';beep(240,.25)
+
+function beginGame() {
+    running = true;
+    paused = false;
+
+    playMusic();
+    spawnMouse();
+
+    spawnTimer = setInterval(() => {
+        if (running && !paused) {
+            spawnMouse();
+        }
+    }, delay);
+
+    clockTimer = setInterval(() => {
+        if (!running || paused) return;
+
+        timeLeft--;
+        $('timer').textContent = '⏱ ' + timeLeft;
+
+        if (timeLeft <= 0) {
+            finish('Hết thời gian!');
+        }
+    }, 1000);
 }
-function pause(){if(!running||paused)return;paused=true;if(active>=0){lifeLeft=Math.max(0,lifeLeft-(Date.now()-mouseStart))}clearTimeout(spawnTimer);clearTimeout(mouseTimer);$('pauseScreen').classList.remove('hidden')}
-function resume(){if(!running||!paused)return;paused=false;$('pauseScreen').classList.add('hidden');if(active>=0){mouseStart=Date.now();mouseTimer=setTimeout(()=>{if(!running||paused||active<0)return;holes[active].classList.remove('up');active=-1;lives--;update();if(lives<=0)end('lives');else schedule(250)},lifeLeft)}else schedule(300)}
-function home(){running=false;paused=false;clearTimers();clearMice();$('countdown').style.display='none';$('menu').classList.remove('hidden');$('hud').classList.add('hidden');$('field').classList.add('hidden');$('gameover').classList.add('hidden');$('pauseScreen').classList.add('hidden');$('message').textContent=''}
-$('startBtn').addEventListener('click',start);$('retryBtn').addEventListener('click',start);$('backBtn').addEventListener('click',home);$('homeBtn').addEventListener('click',home);$('menuBtn').addEventListener('click',()=>paused?resume():pause());$('resumeBtn').addEventListener('click',resume);
-$('soundBtn').addEventListener('click',()=>{soundOn=!soundOn;$('soundBtn').textContent=soundOn?'🔊 Âm thanh: Bật':'🔇 Âm thanh: Tắt';if(soundOn)beep(550)});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(paused)resume();else pause()}});
-update();
+
+/* CHỌN NGẪU NHIÊN 1 TRONG 9 LỖ */
+function spawnMouse() {
+    if (!running || paused) return;
+
+    removeMouse();
+    clearTimeout(mouseTimer);
+
+    const hole = holes[Math.floor(Math.random() * holes.length)];
+
+    const m = document.createElement('div');
+    m.className = 'mouse';
+    m.textContent = Math.random() < 0.15 ? '🐹' : '🐭';
+    m.setAttribute('role', 'button');
+    m.setAttribute('aria-label', 'Đập chuột');
+
+    hole.appendChild(m);
+    currentMouse = m;
+
+    m.onclick = e => {
+        e.stopPropagation();
+
+        if (!running || paused || currentMouse !== m) return;
+
+        score += m.textContent === '🐹' ? 3 : 1;
+        $('score').textContent = '⭐ ' + score;
+
+        m.classList.add('fall');
+        m.textContent = '🔨';
+
+        currentMouse = null;
+        clearTimeout(mouseTimer);
+
+        mouseTimer = setTimeout(() => {
+            m.remove();
+        }, 600);
+
+        // Sau khi đập trúng, chuột mới xuất hiện ở một lỗ ngẫu nhiên
+        clearInterval(spawnTimer);
+
+        spawnTimer = setInterval(() => {
+            if (running && !paused) {
+                spawnMouse();
+            }
+        }, delay);
+
+        setTimeout(() => {
+            if (running && !paused) {
+                spawnMouse();
+            }
+        }, 300);
+    };
+
+    // Chuột biến mất sau thời gian quy định; không đập trúng sẽ mất 1 mạng
+    mouseTimer = setTimeout(() => {
+        if (currentMouse === m && running && !paused) {
+            m.remove();
+            currentMouse = null;
+
+            lives--;
+            $('lives').textContent = lives + '❤️';
+
+            if (lives <= 0) {
+                finish('Hết mạng!');
+            }
+        }
+    }, delay);
+}
+
+function finish(title) {
+    if (!running) return;
+
+    running = false;
+    paused = false;
+
+    stopTimers();
+    removeMouse();
+
+    $('music').pause();
+    $('countdown').classList.add('hidden');
+    $('pauseScreen').classList.add('hidden');
+    $('over').classList.remove('hidden');
+    $('overTitle').textContent = title;
+    $('finalScore').textContent = score;
+
+    if (score > best) {
+        best = score;
+
+        try {
+            localStorage.setItem('dapChuotBest', String(best));
+        } catch(e) {}
+    }
+
+    $('best').textContent = best;
+}
+
+$('startBtn').onclick = resetGame;
+$('againBtn').onclick = resetGame;
+
+$('pauseBtn').onclick = () => {
+    if (!running || paused) {
+        if (paused) resumeGame();
+        return;
+    }
+
+    paused = true;
+    $('pauseScreen').classList.remove('hidden');
+    $('music').pause();
+};
+
+function resumeGame() {
+    if (!paused) return;
+
+    paused = false;
+    $('pauseScreen').classList.add('hidden');
+    playMusic();
+}
+
+$('resumeBtn').onclick = resumeGame;
+
+function home() {
+    gameToken++;
+    running = false;
+    paused = false;
+
+    stopTimers();
+    removeMouse();
+
+    $('music').pause();
+    $('music').currentTime = 0;
+
+    $('menu').classList.remove('hidden');
+    $('over').classList.add('hidden');
+    $('pauseScreen').classList.add('hidden');
+    $('countdown').classList.add('hidden');
+    $('topbar').classList.add('hidden');
+    field.classList.add('hidden');
+}
+
+$('homeBtn').onclick = home;
+$('overHomeBtn').onclick = home;
+
+document.addEventListener('keydown', e => {
+    if (
+        e.code === 'Space' &&
+        !$('menu').classList.contains('hidden')
+    ) {
+        e.preventDefault();
+        resetGame();
+    }
+
+    if (e.key === 'Escape' && running && !paused) {
+        paused = true;
+        $('pauseScreen').classList.remove('hidden');
+        $('music').pause();
+    }
+});
+
+})();
 </script>
 </body>
 </html>
 """
 
-# Nhạc nền lấy từ file ngoc83.mp3 nằm cùng thư mục gốc trên GitHub.
-# File cần được tải lên repo game-dap-chuot với đúng tên ngoc83.mp3.
-music_url = "https://raw.githubusercontent.com/honghoasamsunglt2-tech/game-dap-chuot/main/ngoc83.mp3"
-game = game.replace("</body>", f'<audio id="bgMusic" src="{music_url}" loop preload="auto"></audio><script>\nconst bgMusic=document.getElementById("bgMusic");\nconst oldSoundHandler=document.getElementById("soundBtn");\noldSoundHandler.addEventListener("click",()=>{{if(window.soundOn!==false){{bgMusic.play().catch(()=>{{}})}}else{{bgMusic.pause()}}}});\ndocument.getElementById("startBtn").addEventListener("click",()=>{{bgMusic.play().catch(()=>{{}})}},{{once:false}});\ndocument.getElementById("retryBtn").addEventListener("click",()=>{{bgMusic.play().catch(()=>{{}})}});\ndocument.getElementById("backBtn").addEventListener("click",()=>bgMusic.pause());\ndocument.getElementById("homeBtn").addEventListener("click",()=>bgMusic.pause());\n</script></body>')
-components.html(game, height=780, scrolling=False)
+components.html(game, height=800, scrolling=False)
