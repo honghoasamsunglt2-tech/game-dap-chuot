@@ -655,7 +655,6 @@ src="https://raw.githubusercontent.com/honghoasamsunglt2-tech/game-dap-chuot/mai
 """
 
 components.html(game, height=800, scrolling=False)
-"""
 
 st.markdown(
     "<div style='text-align:center;color:#9ca3af;font-size:12px'>"
